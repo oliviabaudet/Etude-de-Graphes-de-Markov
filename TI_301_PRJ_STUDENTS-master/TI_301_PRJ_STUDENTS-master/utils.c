@@ -5,21 +5,6 @@
 #include "utils.h"
 
 
-typedef struct cell {
-    int destination;
-    float probability;
-    struct cell *next;
-} Cell;
-
-typedef struct {
-    Cell *head;
-} List;
-
-typedef struct {
-    int size;
-    List *array;
-} adjacencylist;
-
 static char *getID(int i)
 {
     // translate from 1,2,3, .. ,500+ to A,B,C,..,Z,AA,AB,...
@@ -45,25 +30,3 @@ static char *getID(int i)
 }
 
 
-Cell* create_cell(int destination, float probability) {
-    Cell* newCell = (Cell*) malloc(sizeof(Cell));
-    if (newCell == NULL) {
-        printf("Memory allocation error.\n");
-        return;
-    }
-    newCell->destination = destination;
-    newCell->probability = probability;
-    newCell->next = NULL;
-    return newCell;
-
-List create_empty_list() {
-        List l;
-        l.head = NULL;
-        return l;
-    }
-
-void add_cell(List* l, int destination, float probability) {
-    Cell* newCell = create_cell(destination, probability);
-    newCell->next = l->head;
-    l->head = newCell;
-}
