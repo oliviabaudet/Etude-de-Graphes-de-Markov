@@ -52,3 +52,36 @@ void add_cell(List* l, int destination, float probability) {
         newCell->next = l->head;
         l->head = newCell;
     }
+void afficherListe(Liste l) {
+    Cellule* tmp = l.head;
+    while (tmp != NULL) {
+        printf("-> (%d, %.2f) ", tmp->sommet, tmp->proba);
+        tmp = tmp->suiv;
+    }
+    printf("\n");
+}
+    ListeAdj creerListeAdj(int taille) {
+    ListeAdj ladj;
+    ladj.taille = taille;
+
+    // allocation du tableau de listes
+    ladj.tab = (Liste*)malloc(taille * sizeof(Liste));
+    if (ladj.tab == NULL) {
+        fprintf(stderr, "Erreur d’allocation mémoire\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // initialisation de chaque liste à vide
+    for (int i = 0; i < taille; i++) {
+        ladj.tab[i] = creerListe();
+    }
+
+    return ladj;
+}
+void afficherListeAdj(ListeAdj ladj) {
+    printf("===== Liste d’adjacence =====\n");
+    for (int i = 0; i < ladj.taille; i++) {
+        printf("Sommet %d : ", i);
+        afficherListe(ladj.tab[i]);
+    }
+}
