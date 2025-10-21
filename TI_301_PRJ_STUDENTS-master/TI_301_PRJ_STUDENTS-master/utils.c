@@ -52,7 +52,7 @@ void add_cell(List* l, int destination, float probability) {
         newCell->next = l->head;
         l->head = newCell;
     }
-void afficherListe(Liste l) {
+void AdjListe(Liste l) {
     Cellule* tmp = l.head;
     while (tmp != NULL) {
         printf("-> (%d, %.2f) ", tmp->sommet, tmp->proba);
@@ -78,7 +78,7 @@ void afficherListe(Liste l) {
 
     return ladj;
 }
-void afficherListeAdj(ListeAdj ladj) {
+void displayListeAdj(ListeAdj ladj) {
     printf("===== Liste d’adjacence =====\n");
     for (int i = 0; i < ladj.taille; i++) {
         printf("Sommet %d : ", i);
