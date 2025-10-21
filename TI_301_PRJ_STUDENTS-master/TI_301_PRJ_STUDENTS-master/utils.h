@@ -18,4 +18,7 @@ typedef struct {
     List *array;
 } adjacencylist;
 
+Cell* create_cell(int destination, float probability);
+List create_empty_list();
+void add_cell(List* l, int destination, float probability);
 #endif
