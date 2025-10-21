@@ -4,20 +4,21 @@
 
 #include "utils.h"
 
-typedef struct cellule {
-    int arrivee;
-    float proba;
-    struct cellule *suiv;
-} cellule;
+
+typedef struct cell {
+    int destination;
+    float probability;
+    struct cell *next;
+} Cell;
 
 typedef struct {
-    cellule *head;
-} liste;
+    Cell *head;
+} list;
 
 typedef struct {
-    int taille;
-    liste *tab;
-} liste_adjacence;
+    int size;
+    List *array;
+} adjacencylist;
 
 static char *getID(int i)
 {
@@ -42,3 +43,5 @@ static char *getID(int i)
 
     return buffer;
 }
+
+
