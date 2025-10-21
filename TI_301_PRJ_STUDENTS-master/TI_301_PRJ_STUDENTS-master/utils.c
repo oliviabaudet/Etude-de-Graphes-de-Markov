@@ -52,6 +52,14 @@ void add_cell(List* l, int destination, float probability) {
         newCell->next = l->head;
         l->head = newCell;
     }
+void displayListe(Liste l) {
+    Cellule* tmp = l.head;
+    while (tmp != NULL) {
+        printf("-> (%d, %.2f) ", tmp->sommet, tmp->proba);
+        tmp = tmp->suiv;
+    }
+    printf("\n");
+}
 void AdjListe(Liste l) {
     Cellule* tmp = l.head;
     while (tmp != NULL) {
