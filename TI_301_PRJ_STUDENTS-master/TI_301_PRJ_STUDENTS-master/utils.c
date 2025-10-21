@@ -4,21 +4,6 @@
 
 #include "utils.h"
 
-typedef struct cellule {
-    int arrivee;
-    float proba;
-    struct cellule *suiv;
-} cellule;
-
-typedef struct {
-    cellule *head;
-} liste;
-
-typedef struct {
-    int taille;
-    liste *tab;
-} liste_adjacence;
-
 static char *getID(int i)
 {
     // translate from 1,2,3, .. ,500+ to A,B,C,..,Z,AA,AB,...
