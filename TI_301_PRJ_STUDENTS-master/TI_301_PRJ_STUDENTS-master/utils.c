@@ -131,3 +131,35 @@ AdjacencyList lireGraphe(const char *nomFichier) {
     return graphe;
 }
 
+// =====================================================
+// verifierGrapheMarkov : vérifie que la somme des probabilités sortantes
+// de chaque sommet est comprise entre 0.99 et 1.01
+// =====================================================
+void verifierGrapheMarkov(AdjacencyList graphe) {
+    int estMarkov = 1;  // indicateur global
+
+    for (int i = 0; i < graphe.size; i++) {
+        float somme = 0.0;
+        Cell* tmp = graphe.array[i].head;
+
+        // Parcours de la liste des arêtes sortantes
+        while (tmp != NULL) {
+            somme += tmp->probability;
+            tmp = tmp->next;
+        }
+
+        // Vérification de la somme
+        if (somme < 0.99 || somme > 1.01) {
+            printf("Sommet %d : somme des probabilités = %.2f ❌\n", i + 1, somme);
+            estMarkov = 0;
+        } else {
+            printf("Sommet %d : somme des probabilités = %.2f ✅\n", i + 1, somme);
+        }
+    }
+
+    printf("\n");
+    if (estMarkov)
+        printf("✅ Le graphe est un graphe de Markov.\n");
+    else
+        printf("❌ Le graphe n’est pas un graphe de Markov.\n");
+}

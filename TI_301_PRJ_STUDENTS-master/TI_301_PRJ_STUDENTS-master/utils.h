@@ -33,6 +33,8 @@ void display_adjacency_list(AdjacencyList adj);
 
 AdjacencyList lireGraphe(const char *nomFichier);
 
+void verifierGrapheMarkov(AdjacencyList graphe);
+
 char* getID(int i);
 
 #endif
