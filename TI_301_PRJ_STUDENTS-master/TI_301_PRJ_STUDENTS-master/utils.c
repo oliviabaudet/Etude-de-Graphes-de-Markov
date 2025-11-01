@@ -7,19 +7,21 @@
 // getID : convertit un numéro (1,2,3,...) en A, B, C, ..., Z, AA, AB...
 // =====================================================
 char* getID(int i) {
-    static char buffer[10];
+    char* buffer = malloc(10 * sizeof(char));
+    if (!buffer) { perror("malloc"); exit(EXIT_FAILURE); }
+
     char temp[10];
     int index = 0;
 
-    i--; // passe à un index 0-based
+    i--; // passage à index 0-based
     while (i >= 0) {
         temp[index++] = 'A' + (i % 26);
         i = (i / 26) - 1;
     }
 
-    for (int j = 0; j < index; j++) {
+    for (int j = 0; j < index; j++)
         buffer[j] = temp[index - j - 1];
-    }
+
     buffer[index] = '\0';
     return buffer;
 }
@@ -29,7 +31,7 @@ char* getID(int i) {
 // =====================================================
 Cell* create_cell(int destination, float probability) {
     Cell* newCell = (Cell*)malloc(sizeof(Cell));
-    if (newCell == NULL) {
+    if (!newCell) {
         fprintf(stderr, "Erreur d'allocation mémoire.\n");
         exit(EXIT_FAILURE);
     }
@@ -49,12 +51,17 @@ List create_empty_list() {
 }
 
 // =====================================================
-// add_cell : ajoute une cellule au début de la liste
+// add_cell : ajoute une cellule à la fin de la liste
 // =====================================================
 void add_cell(List* l, int destination, float probability) {
     Cell* newCell = create_cell(destination, probability);
-    newCell->next = l->head;
-    l->head = newCell;
+    if (!l->head) {
+        l->head = newCell;
+        return;
+    }
+    Cell* tmp = l->head;
+    while (tmp->next) tmp = tmp->next;
+    tmp->next = newCell;
 }
 
 // =====================================================
@@ -62,8 +69,8 @@ void add_cell(List* l, int destination, float probability) {
 // =====================================================
 void display_list(List l) {
     Cell* tmp = l.head;
-    while (tmp != NULL) {
-        printf("-> (%d, %.2f) ", tmp->destination, tmp->probability);
+    while (tmp) {
+        printf("-> (%d, %.6f) ", tmp->destination, tmp->probability);
         tmp = tmp->next;
     }
     printf("\n");
@@ -76,15 +83,12 @@ AdjacencyList create_adjacency_list(int size) {
     AdjacencyList adj;
     adj.size = size;
     adj.array = (List*)malloc(size * sizeof(List));
-    if (adj.array == NULL) {
+    if (!adj.array) {
         fprintf(stderr, "Erreur d’allocation mémoire.\n");
         exit(EXIT_FAILURE);
     }
-
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++)
         adj.array[i] = create_empty_list();
-    }
-
     return adj;
 }
 
@@ -100,11 +104,26 @@ void display_adjacency_list(AdjacencyList adj) {
 }
 
 // =====================================================
+// free_adjacency_list : libère la mémoire allouée
+// =====================================================
+void free_adjacency_list(AdjacencyList adj) {
+    for (int i = 0; i < adj.size; i++) {
+        Cell* tmp = adj.array[i].head;
+        while (tmp) {
+            Cell* toFree = tmp;
+            tmp = tmp->next;
+            free(toFree);
+        }
+    }
+    free(adj.array);
+}
+
+// =====================================================
 // lireGraphe : crée une liste d’adjacence à partir d’un fichier texte
 // =====================================================
 AdjacencyList lireGraphe(const char *nomFichier) {
-    FILE *fichier = fopen(nomFichier, "rt"); // ouverture en lecture texte
-    if (fichier == NULL) {
+    FILE *fichier = fopen(nomFichier, "rt");
+    if (!fichier) {
         perror("Impossible d’ouvrir le fichier");
         exit(EXIT_FAILURE);
     }
@@ -112,18 +131,19 @@ AdjacencyList lireGraphe(const char *nomFichier) {
     int nbSommets, sommetDepart, sommetArrivee;
     float probabilite;
 
-    // Lecture du nombre de sommets (première ligne du fichier)
     if (fscanf(fichier, "%d", &nbSommets) != 1) {
         fprintf(stderr, "Erreur : impossible de lire le nombre de sommets.\n");
         fclose(fichier);
         exit(EXIT_FAILURE);
     }
 
-    // Création de la liste d’adjacence vide
     AdjacencyList graphe = create_adjacency_list(nbSommets);
 
-    // Lecture des arêtes (lignes suivantes)
     while (fscanf(fichier, "%d %d %f", &sommetDepart, &sommetArrivee, &probabilite) == 3) {
+        if (sommetDepart < 1 || sommetDepart > nbSommets || sommetArrivee < 1 || sommetArrivee > nbSommets) {
+            fprintf(stderr, "Erreur : sommet hors limites (%d -> %d)\n", sommetDepart, sommetArrivee);
+            continue;
+        }
         add_cell(&graphe.array[sommetDepart - 1], sommetArrivee, probabilite);
     }
 
@@ -132,34 +152,60 @@ AdjacencyList lireGraphe(const char *nomFichier) {
 }
 
 // =====================================================
-// verifierGrapheMarkov : vérifie que la somme des probabilités sortantes
-// de chaque sommet est comprise entre 0.99 et 1.01
+// verifierGrapheMarkov : vérifie les probabilités sortantes
 // =====================================================
 void verifierGrapheMarkov(AdjacencyList graphe) {
-    int estMarkov = 1;  // indicateur global
-
+    int estMarkov = 1;
     for (int i = 0; i < graphe.size; i++) {
-        float somme = 0.0;
+        float somme = 0.0f;
         Cell* tmp = graphe.array[i].head;
-
-        // Parcours de la liste des arêtes sortantes
-        while (tmp != NULL) {
+        while (tmp) {
             somme += tmp->probability;
             tmp = tmp->next;
         }
-
-        // Vérification de la somme
-        if (somme < 0.99 || somme > 1.01) {
-            printf("Sommet %d : somme des probabilités = %.2f ❌\n", i + 1, somme);
+        if (somme < 0.99f || somme > 1.01f) {
+            printf("Sommet %d : somme des probabilités = %.6f\n", i + 1, somme);
             estMarkov = 0;
         } else {
-            printf("Sommet %d : somme des probabilités = %.2f ✅\n", i + 1, somme);
+            printf("Sommet %d : somme des probabilités = %.6f\n", i + 1, somme);
+        }
+    }
+    printf("\n");
+    if (estMarkov)
+        printf("Le graphe est un graphe de Markov.\n");
+    else
+        printf("Le graphe n’est pas un graphe de Markov.\n");
+}
+
+// =====================================================
+// ecrireFichierMermaid : génère un fichier au format Mermaid
+// =====================================================
+void ecrireFichierMermaid(AdjacencyList graphe, const char *nomFichier) {
+    FILE *fichier = fopen(nomFichier, "wt");
+    if (!fichier) {
+        perror("Erreur lors de la création du fichier Mermaid");
+        exit(EXIT_FAILURE);
+    }
+
+    fprintf(fichier, "---\nconfig:\n  layout: elk\n  theme: neo\n  look: neo\n---\n\n");
+    fprintf(fichier, "flowchart LR\n");
+
+    for (int i = 0; i < graphe.size; i++)
+        fprintf(fichier, "%s((%d))\n", getID(i + 1), i + 1);
+    fprintf(fichier, "\n");
+
+    for (int i = 0; i < graphe.size; i++) {
+        Cell *tmp = graphe.array[i].head;
+        while (tmp) {
+            char* from = getID(i + 1);
+            char* to = getID(tmp->destination);
+            fprintf(fichier, "%s -->|%.6f|%s\n", from, tmp->probability, to);
+            free(from);
+            free(to);
+            tmp = tmp->next;
         }
     }
 
-    printf("\n");
-    if (estMarkov)
-        printf("✅ Le graphe est un graphe de Markov.\n");
-    else
-        printf("❌ Le graphe n’est pas un graphe de Markov.\n");
+    fclose(fichier);
+    printf("Fichier Mermaid généré : %s\n", nomFichier);
 }

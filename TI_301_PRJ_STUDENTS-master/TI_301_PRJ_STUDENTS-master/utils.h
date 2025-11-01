@@ -30,10 +30,13 @@ void display_list(List l);
 
 AdjacencyList create_adjacency_list(int size);
 void display_adjacency_list(AdjacencyList adj);
+void free_adjacency_list(AdjacencyList adj);
 
 AdjacencyList lireGraphe(const char *nomFichier);
 
 void verifierGrapheMarkov(AdjacencyList graphe);
+
+void ecrireFichierMermaid(AdjacencyList graphe, const char *nomFichier);
 
 char* getID(int i);
 
