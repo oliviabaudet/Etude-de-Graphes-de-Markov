@@ -7,7 +7,7 @@ int main() {
     system("chcp 65001 > nul");
     setlocale(LC_ALL, "");
 
-    printf("=== ÉTAPE 1 : Création manuelle du graphe ===\n");
+    printf("=== ETAPE 1 : Creation manuelle du graphe ===\n");
 
     AdjacencyList adj = create_adjacency_list(4);
 
@@ -28,13 +28,13 @@ int main() {
     // Sommet 4
     add_cell(&adj.array[3], 1, 1.00);
 
-    printf("\n--- Affichage du graphe créé manuellement ---\n");
+    printf("\n--- Affichage du graphe cree manuellement ---\n");
     display_adjacency_list(adj);
 
-    printf("\n--- Vérification du graphe manuel ---\n");
+    printf("\n--- Verification du graphe manuel ---\n");
     verifierGrapheMarkov(adj);
 
-    printf("\n--- Génération du fichier Mermaid pour le graphe manuel ---\n");
+    printf("\n--- Generation du fichier Mermaid pour le graphe manuel ---\n");
     ecrireFichierMermaid(adj, "graphe_manuel_mermaid.txt");
 
     // Libération mémoire
@@ -47,10 +47,10 @@ int main() {
     printf("\n--- Affichage du graphe lu ---\n");
     display_adjacency_list(graphe);
 
-    printf("\n--- Vérification du graphe lu ---\n");
+    printf("\n--- Verification du graphe lu ---\n");
     verifierGrapheMarkov(graphe);
 
-    printf("\n--- Génération du fichier Mermaid pour le graphe lu ---\n");
+    printf("\n--- Generation du fichier Mermaid pour le graphe lu ---\n");
     ecrireFichierMermaid(graphe, "graphe_lu_mermaid.txt");
 
     free_adjacency_list(graphe);

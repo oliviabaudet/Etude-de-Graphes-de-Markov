@@ -32,7 +32,7 @@ char* getID(int i) {
 Cell* create_cell(int destination, float probability) {
     Cell* newCell = (Cell*)malloc(sizeof(Cell));
     if (!newCell) {
-        fprintf(stderr, "Erreur d'allocation mémoire.\n");
+        fprintf(stderr, "Erreur d allocation memoire.\n");
         exit(EXIT_FAILURE);
     }
     newCell->destination = destination;
@@ -84,7 +84,7 @@ AdjacencyList create_adjacency_list(int size) {
     adj.size = size;
     adj.array = (List*)malloc(size * sizeof(List));
     if (!adj.array) {
-        fprintf(stderr, "Erreur d’allocation mémoire.\n");
+        fprintf(stderr, "Erreur d allocation memoire.\n");
         exit(EXIT_FAILURE);
     }
     for (int i = 0; i < size; i++)
@@ -96,7 +96,7 @@ AdjacencyList create_adjacency_list(int size) {
 // display_adjacency_list : affiche la liste d'adjacence
 // =====================================================
 void display_adjacency_list(AdjacencyList adj) {
-    printf("===== Liste d’adjacence =====\n");
+    printf("===== Liste d adjacence =====\n");
     for (int i = 0; i < adj.size; i++) {
         printf("Sommet %d : ", i + 1);
         display_list(adj.array[i]);
@@ -124,7 +124,7 @@ void free_adjacency_list(AdjacencyList adj) {
 AdjacencyList lireGraphe(const char *nomFichier) {
     FILE *fichier = fopen(nomFichier, "rt");
     if (!fichier) {
-        perror("Impossible d’ouvrir le fichier");
+        perror("Impossible d ouvrir le fichier");
         exit(EXIT_FAILURE);
     }
 
@@ -164,17 +164,17 @@ void verifierGrapheMarkov(AdjacencyList graphe) {
             tmp = tmp->next;
         }
         if (somme < 0.99f || somme > 1.01f) {
-            printf("Sommet %d : somme des probabilités = %.6f\n", i + 1, somme);
+            printf("Sommet %d : somme des probabilites = %.6f\n", i + 1, somme);
             estMarkov = 0;
         } else {
-            printf("Sommet %d : somme des probabilités = %.6f\n", i + 1, somme);
+            printf("Sommet %d : somme des probabilites = %.6f\n", i + 1, somme);
         }
     }
     printf("\n");
     if (estMarkov)
         printf("Le graphe est un graphe de Markov.\n");
     else
-        printf("Le graphe n’est pas un graphe de Markov.\n");
+        printf("Le graphe n est pas un graphe de Markov.\n");
 }
 
 // =====================================================
@@ -183,7 +183,7 @@ void verifierGrapheMarkov(AdjacencyList graphe) {
 void ecrireFichierMermaid(AdjacencyList graphe, const char *nomFichier) {
     FILE *fichier = fopen(nomFichier, "wt");
     if (!fichier) {
-        perror("Erreur lors de la création du fichier Mermaid");
+        perror("Erreur lors de la creation du fichier Mermaid");
         exit(EXIT_FAILURE);
     }
 
@@ -207,5 +207,5 @@ void ecrireFichierMermaid(AdjacencyList graphe, const char *nomFichier) {
     }
 
     fclose(fichier);
-    printf("Fichier Mermaid généré : %s\n", nomFichier);
+    printf("Fichier Mermaid genere : %s\n", nomFichier);
 }
