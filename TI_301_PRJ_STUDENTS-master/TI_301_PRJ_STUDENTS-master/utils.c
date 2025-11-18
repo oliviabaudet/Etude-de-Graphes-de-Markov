@@ -150,6 +150,33 @@ AdjacencyList lireGraphe(const char *nomFichier) {
     fclose(fichier);
     return graphe;
 }
+AdjacencyList lireGraphe2(const char *nomFichier) {
+    FILE *fichier = fopen(nomFichier, "rt");
+    if (!fichier) { perror("Impossible d'ouvrir le fichier"); exit(EXIT_FAILURE); }
+
+    int nbSommets;
+    if (fscanf(fichier, "%d\n", &nbSommets) != 1) {
+        fprintf(stderr, "Erreur lecture nbSommets\n");
+        exit(EXIT_FAILURE);
+    }
+
+    AdjacencyList graphe = create_adjacency_list(nbSommets);
+
+    char line[128];
+    while (fgets(line, sizeof(line), fichier)) {
+        int depart, arrivee;
+        float poids;
+        if (sscanf(line, "%d %d %f", &depart, &arrivee, &poids) != 3) continue;
+
+        if (depart < 1 || depart > nbSommets || arrivee < 1 || arrivee > nbSommets) continue;
+
+        add_cell(&graphe.array[depart-1], arrivee, 1.0f); // poids fictif
+    }
+
+    fclose(fichier);
+    return graphe;
+}
+
 
 // =====================================================
 // verifierGrapheMarkov : vérifie les probabilités sortantes
@@ -208,4 +235,188 @@ void ecrireFichierMermaid(AdjacencyList graphe, const char *nomFichier) {
 
     fclose(fichier);
     printf("Fichier Mermaid genere : %s\n", nomFichier);
+}
+
+t_tarjan_vertex* init_tarjan_vertice(int n) {
+    t_tarjan_vertex *tab = (t_tarjan_vertex*) malloc(n * sizeof(t_tarjan_vertex));
+    if (!tab) {
+        fprintf(stderr, "Erreur d'allocation memoire pour TarjanVertex.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < n; i++) {
+        tab[i].id = i + 1;    // identifiant 1..n
+        tab[i].num = -1;      // numéro de découverte
+        tab[i].lowlink = -1;  // numéro accessible
+        tab[i].onStack = 0;   // pas dans la pile
+    }
+
+    return tab;
+}
+
+
+t_classe create_classe(const char* name) {
+    t_classe c;
+    strcpy(c.name, name);
+    c.count = 0;
+    c.capacity = 4;
+    c.vertices = malloc(4 * sizeof(int)); // <-- int et non t_tarjan_vertex*
+    return c;
+}
+
+
+void classe_add_vertex(t_classe* c, t_tarjan_vertex* v) {
+    if (c->count == c->capacity) {
+        c->capacity *= 2;
+        c->vertices = realloc(c->vertices, c->capacity * sizeof(t_tarjan_vertex*));
+    }
+    c->vertices[c->count++] = v;
+}
+
+t_partition create_partition() {
+    t_partition p;
+    p.count = 0;
+    p.capacity = 4;
+    p.classes = malloc(4 * sizeof(t_classe));
+    return p;
+}
+
+void partition_add_classe(t_partition* p, t_classe c) {
+    if (p->count == p->capacity) {
+        p->capacity *= 2;
+        p->classes = realloc(p->classes, p->capacity * sizeof(t_classe));
+    }
+    p->classes[p->count++] = c;
+}
+
+
+Stack* stack_create(int capacity) {
+    Stack* s = malloc(sizeof(Stack));
+    s->data = malloc(capacity * sizeof(int));
+    s->top = -1;
+    s->capacity = capacity;
+    return s;
+}
+
+void stack_push(Stack* s, int v) {
+    s->data[++s->top] = v;
+}
+
+int stack_pop(Stack* s) {
+    return s->data[s->top--];
+}
+
+int stack_top(Stack* s) {
+    return s->data[s->top];
+}
+
+int stack_empty(Stack* s) {
+    return s->top == -1;
+}
+// Comparateur pour qsort (mettre en haut du fichier)
+int cmp_int(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b);
+}
+
+// Fonction parcours corrigée
+void parcours(int v_index, AdjacencyList graph, t_tarjan_vertex *tab,
+              t_partition *partition, t_tarjan_vertex **stack, int *stackTop, int *num) {
+
+    t_tarjan_vertex *v = &tab[v_index];
+    v->num = *num;
+    v->lowlink = *num;
+    (*num)++;
+
+    // Empiler le sommet
+    stack[(*stackTop)++] = v;
+    v->onStack = 1;
+
+    // Parcours des successeurs
+    Cell *tmp = graph.array[v_index].head;
+    while (tmp != NULL) {
+        int w_index = tmp->destination - 1;
+        t_tarjan_vertex *w = &tab[w_index];
+
+        if (w->num == -1) {
+            // Successeur non visité : récursion
+            parcours(w_index, graph, tab, partition, stack, stackTop, num);
+            v->lowlink = (v->lowlink < w->lowlink) ? v->lowlink : w->lowlink;
+        } else if (w->onStack) {
+            // Successeur dans la pile
+            v->lowlink = (v->lowlink < w->num) ? v->lowlink : w->num;
+        }
+
+        tmp = tmp->next;
+    }
+
+    // Racine d'une composante fortement connexe
+    if (v->lowlink == v->num) {
+        t_classe c = create_classe("");  // crée une nouvelle classe propre
+        sprintf(c.name, "C%d", partition->count + 1);
+
+        t_tarjan_vertex *w;
+        do {
+            w = stack[--(*stackTop)];
+            w->onStack = 0;
+
+            // Agrandissement du tableau si nécessaire
+            if (c.count == c.capacity) {
+                c.capacity *= 2;
+                c.vertices = realloc(c.vertices, c.capacity * sizeof(int));
+            }
+
+            // Stocker l'id du sommet, pas le pointeur
+            c.vertices[c.count++] = w->id;
+
+        } while (w->id != v->id);  // comparer par id, pas par pointeur
+
+        // Tri des sommets pour un affichage propre
+        qsort(c.vertices, c.count, sizeof(int), cmp_int);
+
+        // Ajouter la classe à la partition
+        partition_add_classe(partition, c);
+    }
+}
+
+t_partition tarjan(AdjacencyList graph) {
+    int n = graph.size;
+
+    // 1. Initialiser les sommets pour Tarjan
+    t_tarjan_vertex *tab = init_tarjan_vertice(n);
+
+    // 2. Initialiser la partition vide
+    t_partition partition = create_partition();
+
+    // 3. Initialiser la pile
+    t_tarjan_vertex **stack = malloc(n * sizeof(t_tarjan_vertex*));
+    if (!stack) {
+        fprintf(stderr, "Erreur d'allocation memoire pour la pile.\n");
+        exit(EXIT_FAILURE);
+    }
+    int stackTop = 0;
+
+    // 4. Initialiser le compteur num
+    int num = 0;
+
+    // 5. Parcourir tous les sommets
+    for (int i = 0; i < n; i++) {
+        if (tab[i].num == -1) {
+            parcours(i, graph, tab, &partition, stack, &stackTop, &num);
+        }
+    }
+
+    // 6. Libérer la pile et le tableau temporaire
+    free(stack);
+    free(tab);
+
+    // 7. Retourner la partition finale
+    return partition;
+}
+
+
+void free_partition(t_partition p) {
+    for (int i = 0; i < p.count; i++) {
+        free(p.classes[i].vertices);  // libère le tableau des sommets de chaque classe
+    }
+    free(p.classes);  // libère le tableau des classes
 }

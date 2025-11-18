@@ -40,22 +40,27 @@ int main() {
     // Libération mémoire
     free_adjacency_list(adj);
 
-    printf("\n=== Lecture du graphe depuis fichier ===\n");
+    printf("\n=== Partie 2 ===\n");
 
-    AdjacencyList graphe = lireGraphe("data/exemple1.txt");
+    printf("\n===Affichage des classes===\n");
+    AdjacencyList graphe = lireGraphe2("data/exemple_valid_step3.txt");
 
-    printf("\n--- Affichage du graphe lu ---\n");
-    display_adjacency_list(graphe);
 
-    printf("\n--- Verification du graphe lu ---\n");
-    verifierGrapheMarkov(graphe);
 
-    printf("\n--- Generation du fichier Mermaid pour le graphe lu ---\n");
-    ecrireFichierMermaid(graphe, "graphe_lu_mermaid.txt");
+    t_partition partition = tarjan(graphe);
 
+    for(int i = 0; i < partition.count; i++) {
+        t_classe c = partition.classes[i];
+        printf("Composante %s: {", c.name);
+        for(int j = 0; j < c.count; j++) {
+            printf("%d", c.vertices[j]);
+            if(j < c.count-1) printf(",");
+        }
+        printf("}\n");
+    }
+
+    free_partition(partition);
     free_adjacency_list(graphe);
-
-
 
     return 0;
 }
