@@ -26,7 +26,7 @@ char* getID(int i) {
     return buffer;
 }
 
-// =====================================================
+// ======================================================
 // create_cell : crée une cellule (arête)
 // =====================================================
 Cell* create_cell(int destination, float probability) {
