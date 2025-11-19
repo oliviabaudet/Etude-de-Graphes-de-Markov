@@ -420,3 +420,4 @@ void free_partition(t_partition p) {
     }
     free(p.classes);  // libère le tableau des classes
 }
+//
