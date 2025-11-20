@@ -11,5 +11,6 @@ add_executable(TI_301_PRJ_STUDENTS-master
         utils.c
         matrix.c)
 
+
 # Copier le dossier data dans le dossier de build
 file(COPY ${CMAKE_SOURCE_DIR}/data DESTINATION ${CMAKE_BINARY_DIR})

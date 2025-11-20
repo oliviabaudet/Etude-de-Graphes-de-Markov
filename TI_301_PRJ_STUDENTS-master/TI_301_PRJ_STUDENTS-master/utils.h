@@ -101,4 +101,5 @@ void caracteristiques_graphe(AdjacencyList g, t_partition p, int *classOf);
 
 
 
+
 #endif

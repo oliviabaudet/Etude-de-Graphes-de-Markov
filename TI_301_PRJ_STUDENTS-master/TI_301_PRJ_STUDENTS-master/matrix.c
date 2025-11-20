@@ -84,3 +84,4 @@ void freeMatrix(t_matrix A) {
     free(A.data);
 }
 
+
