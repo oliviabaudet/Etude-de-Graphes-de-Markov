@@ -420,4 +420,149 @@ void free_partition(t_partition p) {
     }
     free(p.classes);  // libère le tableau des classes
 }
+
+int* build_class_index(t_partition partition, int nbSommets) {
+    int *classOf = malloc((nbSommets + 1) * sizeof(int));
+
+    for (int i = 0; i < partition.count; i++) {
+        t_classe c = partition.classes[i];
+        for (int j = 0; j < c.count; j++) {
+            int v = c.vertices[j];   // identifiant réel
+            classOf[v] = i;          // i = index de la classe
+        }
+    }
+
+    return classOf;
+}
+
+void build_class_links(AdjacencyList g, t_partition p, int *classOf) {
+    int nC = p.count;
+
+    int **link = malloc(nC * sizeof(int*));
+    for (int i = 0; i < nC; i++) {
+        link[i] = calloc(nC, sizeof(int));
+    }
+
+    for (int u = 1; u <= g.size; u++) {
+        int cu = classOf[u]; // classe de u
+
+        Cell *tmp = g.array[u-1].head;
+        while (tmp) {
+            int v = tmp->destination;
+            int cv = classOf[v];
+
+            if (cu != cv) {
+                link[cu][cv] = 1; // lien entre classes
+            }
+            tmp = tmp->next;
+        }
+    }
+
+    // affichage :
+    for (int i = 0; i < nC; i++) {
+        for (int j = 0; j < nC; j++) {
+            if (link[i][j]) {
+                printf("%s -> %s\n", p.classes[i].name, p.classes[j].name);
+            }
+        }
+    }
+}
+
+// =====================================================
+// ÉTAPE 3 : Caractéristiques du graphe
+// =====================================================
+int est_absorbant(AdjacencyList g, int sommet) {
+    Cell *tmp = g.array[sommet-1].head;
+    if (!tmp) return 0; // aucun lien sortant -> pas absorbant
+
+    int boucle_sur_soi = 0;
+
+    while (tmp) {
+        if (tmp->destination == sommet && tmp->probability > 0.0f)
+            boucle_sur_soi = 1; // il peut rester sur lui-même
+        else if (tmp->probability > 0.0f)
+            return 0; // lien sortant vers un autre état => pas absorbant
+        tmp = tmp->next;
+    }
+
+    return boucle_sur_soi; // vrai si boucle sur lui-même et pas de lien vers d'autres
+
+
+    }
+
+void afficher_etats_absorbants(AdjacencyList g) {
+    printf("• Etats absorbants : ");
+    int found = 0;
+
+    for (int i = 1; i <= g.size; i++) {
+        if (est_absorbant(g, i)) {
+            printf("%d ", i);
+            found = 1;
+        }
+    }
+
+    if (!found) printf("Aucun");
+    printf("\n");
+
+
+    if (!found) printf("Aucun");
+    printf("\n");
+}
+void classes_transitoires_persistantes(AdjacencyList g, t_partition p, int *classOf) {
+
+    int nC = p.count;
+
+    // matrice de lien entre classes
+    int **link = malloc(nC * sizeof(int*));
+    for (int i = 0; i < nC; i++)
+        link[i] = calloc(nC, sizeof(int));
+
+    // remplissage
+    for (int u = 1; u <= g.size; u++) {
+        int cu = classOf[u];
+        for (Cell *tmp = g.array[u-1].head; tmp; tmp = tmp->next) {
+            int cv = classOf[tmp->destination];
+            if (cu != cv)
+                link[cu][cv] = 1;
+        }
+    }
+
+    // affichage
+    printf("Nature des classes :\n");
+    for (int i = 0; i < nC; i++) {
+        int sort = 0;
+        for (int j = 0; j < nC; j++)
+            if (i != j && link[i][j])
+                sort = 1;
+
+        if (sort)
+            printf("  %s : TRANSITOIRE\n", p.classes[i].name);
+        else
+            printf("  %s : PERSISTANTE\n", p.classes[i].name);
+    }
+
+    for (int i = 0; i < nC; i++) free(link[i]);
+    free(link);
+}
+void tester_irreductibilite(t_partition p) {
+    if (p.count == 1)
+        printf("Le graphe est IRRÉDUCTIBLE\n");
+    else
+        printf("Le graphe n'est PAS irreductible (%d classes)\n", p.count);
+}
+void caracteristiques_graphe(AdjacencyList g, t_partition p, int *classOf) {
+
+    printf("1) Etats absorbants :\n");
+    afficher_etats_absorbants(g);
+
+    printf("\n2) Classes transitoires / persistantes :\n");
+    classes_transitoires_persistantes(g, p, classOf);
+
+    printf("\n3) Irreductibilite :\n");
+    tester_irreductibilite(p);
+
+    printf("\n");
+}
+
+
 //

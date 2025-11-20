@@ -40,27 +40,42 @@ int main() {
     // Libération mémoire
     free_adjacency_list(adj);
 
+
     printf("\n=== Partie 2 ===\n");
 
-    printf("\n===Affichage des classes===\n");
-    AdjacencyList graphe = lireGraphe2("data/exemple_valid_step3.txt");
+    AdjacencyList g = lireGraphe2("data/exemple_valid_step3.txt");
+    t_partition partition = tarjan(g);
 
-
-
-    t_partition partition = tarjan(graphe);
-
-    for(int i = 0; i < partition.count; i++) {
-        t_classe c = partition.classes[i];
-        printf("Composante %s: {", c.name);
-        for(int j = 0; j < c.count; j++) {
-            printf("%d", c.vertices[j]);
-            if(j < c.count-1) printf(",");
+    // 1. affichage des classes
+    printf("\n=== Les Classes ===\n");
+    for (int i = 0; i < partition.count; i++) {
+        printf("%s : {", partition.classes[i].name);
+        for (int j = 0; j < partition.classes[i].count; j++) {
+            printf("%d", partition.classes[i].vertices[j]);
+            if (j < partition.classes[i].count - 1) printf(",");
         }
         printf("}\n");
     }
 
+    // 2. Construire tableau sommet → classe
+    int *classOf = build_class_index(partition, g.size);
+
+    // 3. Construire liens entre classes
+    printf("\n=== Liens entre classes ===\n");
+    build_class_links(g, partition, classOf);
+
+    // ====================================================
+    // ÉTAPE 3 : caracteristiques du graphe (TRANSITOIRE / PERSISTANTE / ABSORBANTE / IRRÉDUCTIBLE)
+    // ====================================================
+
+    printf("\n=== Etape 3 : Caractéristiques du graphe ===\n");
+    caracteristiques_graphe(g, partition, classOf);
+
+    // Libération
+    free(classOf);
     free_partition(partition);
-    free_adjacency_list(graphe);
+    free_adjacency_list(g);
+
 
     return 0;
 }

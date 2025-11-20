@@ -62,6 +62,7 @@ void display_adjacency_list(AdjacencyList adj);
 void free_adjacency_list(AdjacencyList adj);
 
 AdjacencyList lireGraphe(const char *nomFichier);
+AdjacencyList lireGraphe2(const char *nomFichier);
 
 void verifierGrapheMarkov(AdjacencyList graphe);
 
@@ -90,6 +91,12 @@ void parcours(int v_index, AdjacencyList graph, t_tarjan_vertex *tab, t_partitio
               t_tarjan_vertex **stack, int *stackTop, int *num);
 
 t_partition tarjan(AdjacencyList graph);
-AdjacencyList lireGraphe2(const char *nomFichier);
+// Construit un tableau qui donne la classe de chaque sommet (1..n)
+int* build_class_index(t_partition partition, int nbSommets);
+
+// Construit les liens entre classes (graphe réduit) et les affiche
+void build_class_links(AdjacencyList g, t_partition p, int *classOf);
+void caracteristiques_graphe(AdjacencyList g, t_partition p, int *classOf);
+
 
 #endif
