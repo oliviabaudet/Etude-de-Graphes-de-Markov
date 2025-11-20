@@ -99,4 +99,6 @@ void build_class_links(AdjacencyList g, t_partition p, int *classOf);
 void caracteristiques_graphe(AdjacencyList g, t_partition p, int *classOf);
 
 
+
+
 #endif
