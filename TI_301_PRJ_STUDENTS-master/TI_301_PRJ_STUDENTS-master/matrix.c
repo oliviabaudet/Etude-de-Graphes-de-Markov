@@ -2,6 +2,7 @@
 #include <math.h>
 
 
+
 t_matrix createEmptyMatrix(int n) {
     t_matrix M;
     M.rows = n; //nombre de ligne de la matrice vide
@@ -83,5 +84,83 @@ void freeMatrix(t_matrix A) {
         free(A.data[i]);
     free(A.data);
 }
+
+
+t_matrix subMatrix(t_matrix matrix, t_partition part, int compo_index)//Extracts a submatrix corresponding to a specific component of a graph partition
+{
+    // 1) Récupérer la classe
+    t_classe classe = part.classes[compo_index];
+    int k = classe.count;
+
+    // 2) Créer une matrice k×k correctement initialisée
+    t_matrix sub = createEmptyMatrix(k);
+
+    // 3) Construire la sous-matrice
+    for (int i = 0; i < k; i++) {
+        int original_row = classe.vertices[i] - 1;  // -1 car identifiants 1..n
+        for (int j = 0; j < k; j++) {
+            int original_col = classe.vertices[j] - 1;
+            sub.data[i][j] = matrix.data[original_row][original_col];
+        }
+    }
+
+    return sub;
+}
+
+t_matrix limitPower(t_matrix M)
+{
+    int n = M.rows;
+    t_matrix A = createEmptyMatrix(n);
+    t_matrix B = createEmptyMatrix(n);
+    copyMatrix(A, M);
+
+    double epsilon = 1e-12;
+    int maxIter = 1000;
+    int iter = 0;
+    double diff = epsilon + 1; // pour démarrer la boucle
+
+    // ← Ici tu remplaces while(1)
+    while(diff > epsilon && iter < maxIter)
+    {
+        multiplyMatrices(A, M, B); // B = A * M
+
+        // Normaliser les lignes
+        for (int i = 0; i < n; i++) {
+            double sum = 0;
+            for (int j = 0; j < n; j++)
+                sum += B.data[i][j];
+            if (sum > 0)
+                for (int j = 0; j < n; j++)
+                    B.data[i][j] /= sum;
+        }
+
+        diff = diffMatrices(A, B);
+        copyMatrix(A, B);
+        iter++;
+    }
+
+    if(iter == maxIter)
+        printf("Attention : puissance limite non convergente après %d itérations.\n", maxIter);
+
+    freeMatrix(B);
+    return A;
+}
+
+
+
+
+
+
+void printStationary(t_matrix limit)
+{
+    int n = limit.rows;
+    printf("Distribution stationnaire : ");
+    for (int j = 0; j < n; j++) {
+        printf("%.6f ", limit.data[0][j]);
+    }
+    printf("\n");
+}
+
+
 
 

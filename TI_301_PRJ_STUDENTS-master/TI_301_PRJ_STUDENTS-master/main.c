@@ -150,5 +150,43 @@ int main() {
     freeMatrix(M);
     freeMatrix(M2);
     freeMatrix(M7);
+
+//étape 2:
+    t_partition p = tarjan(adjmeteo);
+    int *classof = build_class_index(p, adjmeteo.size);
+
+    for (int c = 0; c < p.count; c++) {
+        printf("\nClasse %s (taille %d) :\n",
+               p.classes[c].name, p.classes[c].count);
+
+        // 1. Extraire la sous-matrice
+        t_matrix sub = subMatrix(M, p, c);
+
+        printf("Sous-matrice :\n");
+        for(int i = 0; i < sub.rows; i++){
+            for(int j = 0; j < sub.cols; j++)
+                printf("%.3f ", sub.data[i][j]);
+            printf("\n");
+        }
+
+        // 2. Calcul de la puissance limite
+        t_matrix limit = limitPower(sub);
+        printf("Puissance limite :\n");
+        for(int i = 0; i < limit.rows; i++){
+            for(int j = 0; j < limit.cols; j++)
+                printf("%.6f ", limit.data[i][j]);
+            printf("\n");
+        }
+
+
+        // 3. Distribution stationnaire
+        printStationary(limit);
+
+        freeMatrix(sub);
+        freeMatrix(limit);
+    }
+
+    free(classof);
+    free_partition(p);
 }
 
