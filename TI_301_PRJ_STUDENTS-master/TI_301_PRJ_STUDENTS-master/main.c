@@ -72,7 +72,7 @@ int main() {
     // PARTIE 3:
     printf("\n=== PARTIE 3 ===\n");
     // Transformer la liste d'adjacence en matrice
-    AdjacencyList adjmeteo = lireGraphe("data/exemple_meteo.txt");
+    AdjacencyList adjmeteo = lireGraphe("data/exemple1.txt");
     display_adjacency_list(adjmeteo);
     t_matrix M = matrixAdjacencyList(adjmeteo); // transfo d'une adj list en matrice
     //afficher la matrice
@@ -147,7 +147,6 @@ int main() {
     // Libération mémoire des matrices
     freeMatrix(Mprev);
     freeMatrix(Mcurr);
-    freeMatrix(M);
     freeMatrix(M2);
     freeMatrix(M7);
 
@@ -184,8 +183,9 @@ int main() {
 
         freeMatrix(sub);
         freeMatrix(limit);
-    }
 
+    }
+    freeMatrix(M);
     free(classof);
     free_partition(p);
 }
