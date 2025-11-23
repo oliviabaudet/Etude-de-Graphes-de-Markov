@@ -7,6 +7,7 @@
 
 
 int main() {
+    printf("\n=== Partie 1 ===\n");
     system("chcp 65001 > nul");
     setlocale(LC_ALL, "");
     //bien lire les fichier.txt de data PARTIE 3
@@ -38,20 +39,23 @@ int main() {
         }
         printf("}\n");
     }
-    // 2. Construire tableau sommet → classe
     int *classOf = build_class_index(partition, g.size);
-    // 3. Construire liens entre classes
-    printf("\n=== Liens entre classes ===\n");
-    build_class_links(g, partition, classOf);
+
+    // Obtenir la matrice des liens
+    int **links = build_class_links(g, partition, classOf);
+
+    // Générer le fichier Mermaid
+    generate_mermaid_hasse("hasse.md", partition, links);
     // ====================================================
     // ÉTAPE 3 : caracteristiques du graphe (TRANSITOIRE / PERSISTANTE / ABSORBANTE / IRRÉDUCTIBLE)
     // ====================================================
-    printf("\n=== Etape 3 : Caractéristiques du graphe ===\n");
+    printf("\n=== Caractéristiques du graphe ===\n");
     caracteristiques_graphe(g, partition, classOf);
     // Libération
     free(classOf);
     free_partition(partition);
     free_adjacency_list(g);
+
 
 
 
