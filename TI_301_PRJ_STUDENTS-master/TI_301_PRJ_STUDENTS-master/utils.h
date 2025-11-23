@@ -90,7 +90,6 @@ typedef struct {
     int capacity;
 } Stack;
 
-
 // ==== Fonctions ====
 
 Cell* create_cell(int destination, float probability);
@@ -128,17 +127,20 @@ int stack_top(Stack* s);
 int stack_empty(Stack* s);
 
 // Algorithme de Tarjan
-void parcours(int v_index, AdjacencyList graph, t_tarjan_vertex *tab, t_partition *partition,
-              t_tarjan_vertex **stack, int *stackTop, int *num);
-
+void parcours(int v_index, AdjacencyList graph, t_tarjan_vertex *tab,
+              t_partition *partition, Stack *S, int *num);
 t_partition tarjan(AdjacencyList graph);
 // Construit un tableau qui donne la classe de chaque sommet (1..n)
 int* build_class_index(t_partition partition, int nbSommets);
 
 // Construit les liens entre classes (graphe réduit) et les affiche
-void build_class_links(AdjacencyList g, t_partition p, int *classOf);
-void caracteristiques_graphe(AdjacencyList g, t_partition p, int *classOf);
+int** build_class_links(AdjacencyList g, t_partition p, int *classOf);
 
+/**
+ * Génère un fichier Mermaid contenant le diagramme de Hasse.
+ */
+void generate_mermaid_hasse(const char *filename, t_partition p, int **links);
+void caracteristiques_graphe(AdjacencyList g, t_partition p, int *classOf);
 
 
 

@@ -260,7 +260,7 @@ t_classe create_classe(const char* name) {
     strcpy(c.name, name);
     c.count = 0;
     c.capacity = 4;
-    c.vertices = malloc(4 * sizeof(int)); // <-- int et non t_tarjan_vertex*
+    c.vertices = malloc(c.capacity * sizeof(int)); // <-- int et non t_tarjan_vertex*
     return c;
 }
 
@@ -277,7 +277,7 @@ t_partition create_partition() {
     t_partition p;
     p.count = 0;
     p.capacity = 4;
-    p.classes = malloc(4 * sizeof(t_classe));
+    p.classes = malloc(p.capacity * sizeof(t_classe));
     return p;
 }
 
@@ -320,96 +320,92 @@ int cmp_int(const void *a, const void *b) {
 
 // Fonction parcours corrigée
 void parcours(int v_index, AdjacencyList graph, t_tarjan_vertex *tab,
-              t_partition *partition, t_tarjan_vertex **stack, int *stackTop, int *num) {
+              t_partition *partition, Stack *S, int *num) {
 
     t_tarjan_vertex *v = &tab[v_index];
+
+    /* 1. initialiser num et lowlink */
     v->num = *num;
     v->lowlink = *num;
     (*num)++;
 
-    // Empiler le sommet
-    stack[(*stackTop)++] = v;
+    /* 2. empiler v (on empile l'index 0-based) */
+    stack_push(S, v_index);
     v->onStack = 1;
 
-    // Parcours des successeurs
+    /* 3. parcourir les successeurs */
     Cell *tmp = graph.array[v_index].head;
     while (tmp != NULL) {
-        int w_index = tmp->destination - 1;
+        int w_index = tmp->destination - 1; /* destination est 1-based */
+        if (w_index < 0 || w_index >= graph.size) {
+            fprintf(stderr, "Warning: destination hors limites: %d\n", tmp->destination);
+            tmp = tmp->next;
+            continue;
+        }
         t_tarjan_vertex *w = &tab[w_index];
 
         if (w->num == -1) {
-            // Successeur non visité : récursion
-            parcours(w_index, graph, tab, partition, stack, stackTop, num);
-            v->lowlink = (v->lowlink < w->lowlink) ? v->lowlink : w->lowlink;
+            /* successeur non visité : récursion */
+            parcours(w_index, graph, tab, partition, S, num);
+            if (v->lowlink > w->lowlink) v->lowlink = w->lowlink;
         } else if (w->onStack) {
-            // Successeur dans la pile
-            v->lowlink = (v->lowlink < w->num) ? v->lowlink : w->num;
+            /* successeur dans la pile : back-edge */
+            if (v->lowlink > w->num) v->lowlink = w->num;
         }
-
         tmp = tmp->next;
     }
 
-    // Racine d'une composante fortement connexe
+    /* 4. si v est racine d'une SCC, dépiler pour former la classe */
     if (v->lowlink == v->num) {
-        t_classe c = create_classe("");  // crée une nouvelle classe propre
+        t_classe c = create_classe("");
         sprintf(c.name, "C%d", partition->count + 1);
 
-        t_tarjan_vertex *w;
+        int w_idx;
         do {
-            w = stack[--(*stackTop)];
+            w_idx = stack_pop(S);
+            t_tarjan_vertex *w = &tab[w_idx];
             w->onStack = 0;
 
-            // Agrandissement du tableau si nécessaire
+            /* garantir espace pour insérer l'id */
             if (c.count == c.capacity) {
-                c.capacity *= 2;
-                c.vertices = realloc(c.vertices, c.capacity * sizeof(int));
+                int newcap = c.capacity * 2;
+                int *tmpv = realloc(c.vertices, newcap * sizeof(int));
+                if (!tmpv) { perror("realloc c.vertices"); exit(EXIT_FAILURE); }
+                c.vertices = tmpv;
+                c.capacity = newcap;
             }
 
-            // Stocker l'id du sommet, pas le pointeur
+            /* stocker l'id (1-based) du sommet dans la classe */
             c.vertices[c.count++] = w->id;
+        } while (w_idx != v_index);
 
-        } while (w->id != v->id);  // comparer par id, pas par pointeur
-
-        // Tri des sommets pour un affichage propre
+        /* trier pour affichage propre */
         qsort(c.vertices, c.count, sizeof(int), cmp_int);
 
-        // Ajouter la classe à la partition
+        /* ajouter la classe à la partition */
         partition_add_classe(partition, c);
     }
 }
 
+/* Fonction tarjan complète qui prépare tout et appelle parcours sur chaque sommet non visité */
 t_partition tarjan(AdjacencyList graph) {
     int n = graph.size;
-
-    // 1. Initialiser les sommets pour Tarjan
     t_tarjan_vertex *tab = init_tarjan_vertice(n);
-
-    // 2. Initialiser la partition vide
     t_partition partition = create_partition();
-
-    // 3. Initialiser la pile
-    t_tarjan_vertex **stack = malloc(n * sizeof(t_tarjan_vertex*));
-    if (!stack) {
-        fprintf(stderr, "Erreur d'allocation memoire pour la pile.\n");
-        exit(EXIT_FAILURE);
-    }
-    int stackTop = 0;
-
-    // 4. Initialiser le compteur num
+    Stack *S = stack_create(16);
     int num = 0;
 
-    // 5. Parcourir tous les sommets
     for (int i = 0; i < n; i++) {
         if (tab[i].num == -1) {
-            parcours(i, graph, tab, &partition, stack, &stackTop, &num);
+            parcours(i, graph, tab, &partition, S, &num);
         }
     }
 
-    // 6. Libérer la pile et le tableau temporaire
-    free(stack);
-    free(tab);
+    /* cleanup */
+    free(S->data);
+    free(S);
+    free(tab); /* si tu veux garder tab pour debug, n'appelles pas free ici */
 
-    // 7. Retourner la partition finale
     return partition;
 }
 
@@ -420,6 +416,7 @@ void free_partition(t_partition p) {
     }
     free(p.classes);  // libère le tableau des classes
 }
+
 
 int* build_class_index(t_partition partition, int nbSommets) {
     int *classOf = malloc((nbSommets + 1) * sizeof(int));
@@ -435,7 +432,7 @@ int* build_class_index(t_partition partition, int nbSommets) {
     return classOf;
 }
 
-void build_class_links(AdjacencyList g, t_partition p, int *classOf) {
+int** build_class_links(AdjacencyList g, t_partition p, int *classOf) {
     int nC = p.count;
 
     int **link = malloc(nC * sizeof(int*));
@@ -444,29 +441,25 @@ void build_class_links(AdjacencyList g, t_partition p, int *classOf) {
     }
 
     for (int u = 1; u <= g.size; u++) {
-        int cu = classOf[u]; // classe de u
+        int cu = classOf[u];
 
         Cell *tmp = g.array[u-1].head;
         while (tmp) {
             int v = tmp->destination;
             int cv = classOf[v];
 
-            if (cu != cv) {
-                link[cu][cv] = 1; // lien entre classes
-            }
+            if (cu != cv)
+                link[cu][cv] = 1;
+
             tmp = tmp->next;
         }
     }
 
-    // affichage :
-    for (int i = 0; i < nC; i++) {
-        for (int j = 0; j < nC; j++) {
-            if (link[i][j]) {
-                printf("%s -> %s\n", p.classes[i].name, p.classes[j].name);
-            }
-        }
-    }
+    return link;
 }
+
+
+
 
 // =====================================================
 // ÉTAPE 3 : Caractéristiques du graphe
@@ -563,5 +556,59 @@ void caracteristiques_graphe(AdjacencyList g, t_partition p, int *classOf) {
 
     printf("\n");
 }
+
+void generate_mermaid_hasse(const char *filename, t_partition p, int **links) {
+    FILE *f = fopen(filename, "w");
+    if (!f) {
+        printf("Erreur ouverture fichier\n");
+        return;
+    }
+
+    // --- Header Mermaid ---
+    fprintf(f,
+        "---\n"
+        "config:\n"
+        "   layout: elk\n"
+        "   theme: mc\n"
+        "   look: classic\n"
+        "---\n\n"
+        "flowchart LR\n"
+    );
+
+    // 1. Écrire les noeuds
+    for (int i = 0; i < p.count; i++) {
+        char *ID = getID(i + 1);  // <-- utilisation ici
+        fprintf(f, "%s[\"{", ID);
+
+        for (int j = 0; j < p.classes[i].count; j++) {
+            fprintf(f, "%d", p.classes[i].vertices[j]);
+            if (j < p.classes[i].count - 1) fprintf(f, ",");
+        }
+
+        fprintf(f, "}\"]\n");
+        free(ID);
+    }
+
+    // 2. Écrire les liens
+    for (int i = 0; i < p.count; i++) {
+        for (int j = 0; j < p.count; j++) {
+            if (links[i][j]) {
+                char *ID1 = getID(i + 1);
+                char *ID2 = getID(j + 1);
+
+                fprintf(f, "%s --> %s\n", ID1, ID2);
+
+                free(ID1);
+                free(ID2);
+            }
+        }
+    }
+
+    fclose(f);
+    printf("Fichier Mermaid genere : %s\n", filename);
+}
+
+
+
 
 //

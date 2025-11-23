@@ -51,11 +51,13 @@ int main() {
         }
         printf("}\n");
     }
-    // 2. Construire tableau sommet → classe
     int *classOf = build_class_index(partition, g.size);
-    // 3. Construire liens entre classes
-    printf("\n=== Liens entre classes ===\n");
-    build_class_links(g, partition, classOf);
+
+    // Obtenir la matrice des liens
+    int **links = build_class_links(g, partition, classOf);
+
+    // Générer le fichier Mermaid
+    generate_mermaid_hasse("hasse.md", partition, links);
     // ====================================================
     // ÉTAPE 3 : caracteristiques du graphe (TRANSITOIRE / PERSISTANTE / ABSORBANTE / IRRÉDUCTIBLE)
     // ====================================================
@@ -65,6 +67,7 @@ int main() {
     free(classOf);
     free_partition(partition);
     free_adjacency_list(g);
+
 
 
 
