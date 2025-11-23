@@ -12,13 +12,13 @@ int main() {
     setlocale(LC_ALL, "");
     //bien lire les fichier.txt de data PARTIE 3
     setlocale(LC_NUMERIC, "C");
-    printf("=== ETAPE 1 : Creation manuelle du graphe ===\n");
+    printf("=== ETAPE 1 : Creation du graphe ===\n");
     AdjacencyList adj = lireGraphe("data/exemple1.txt");
-    printf("\n--- Affichage du graphe cree manuellement ---\n");
+    printf("\n--- Affichage du graphe---\n");
     display_adjacency_list(adj);
-    printf("\n--- Verification du graphe manuel ---\n");
+    printf("\n--- Verification du graphe---\n");
     verifierGrapheMarkov(adj);
-    printf("\n--- Generation du fichier Mermaid pour le graphe manuel ---\n");
+    printf("\n--- Generation du fichier Mermaid pour le graphe ---\n");
     ecrireFichierMermaid(adj, "graphe_manuel_mermaid.txt");
     // Libération mémoire
     free_adjacency_list(adj);

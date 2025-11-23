@@ -3,9 +3,24 @@
 #include <string.h>
 #include "utils.h"
 
-// =====================================================
-// getID : convertit un numéro (1,2,3,...) en A, B, C, ..., Z, AA, AB...
-// =====================================================
+/**
+ * @brief Convertit un nombre en identifiant alphabétique
+ *
+ * Convertit un entier positif en une chaîne de caractères représentant
+ * un identifiant alphabétique selon le format suivant :
+ * 1 -> A, 2 -> B, ..., 26 -> Z, 27 -> AA, 28 -> AB, etc.
+ *
+ * @param i Entier positif à convertir (1-based)
+ * @return Chaîne de caractères allouée dynamiquement contenant l'identifiant
+ * @note La mémoire retournée doit être libérée par l'appelant
+ * @warning La fonction termine le programme si l'allocation échoue
+ *
+ * @example
+ * char* id = getID(1);   // Retourne "A"
+ * char* id = getID(26);  // Retourne "Z"
+ * char* id = getID(27);  // Retourne "AA"
+ */
+
 char* getID(int i) {
     char* buffer = malloc(10 * sizeof(char));
     if (!buffer) { perror("malloc"); exit(EXIT_FAILURE); }
@@ -26,9 +41,22 @@ char* getID(int i) {
     return buffer;
 }
 
-// ======================================================
-// create_cell : crée une cellule (arête)
-// =====================================================
+
+/**
+ * @brief Crée une nouvelle cellule de liste chaînée
+ *
+ * Cette fonction alloue dynamiquement une nouvelle cellule et initialise
+ * ses champs avec les valeurs fournies.
+ *
+ * @param destination Identifiant du sommet de destination
+ * @param probability Probabilité associée à la transition
+ * @return Pointeur vers la nouvelle cellule créée
+ * @warning La fonction termine le programme si l'allocation échoue
+ *
+ * @see Cell Structure de données représentant une cellule
+ *
+ * @note La cellule créée doit être libérée avec free() quand elle n'est plus utilisée
+ */
 Cell* create_cell(int destination, float probability) {
     Cell* newCell = (Cell*)malloc(sizeof(Cell));
     if (!newCell) {
@@ -41,18 +69,40 @@ Cell* create_cell(int destination, float probability) {
     return newCell;
 }
 
-// =====================================================
-// create_empty_list : initialise une liste vide
-// =====================================================
+/**
+ * @brief Crée une nouvelle liste chaînée vide
+ *
+ * Initialise une nouvelle structure List avec une tête de liste nulle,
+ * représentant ainsi une liste vide.
+ *
+ * @return Une structure List initialisée et vide
+ *
+ * @see List Structure de données représentant une liste chaînée
+ */
 List create_empty_list() {
     List l;
     l.head = NULL;
     return l;
 }
 
-// =====================================================
-// add_cell : ajoute une cellule à la fin de la liste
-// =====================================================
+/**
+ * @brief Ajoute une nouvelle cellule à la fin d'une liste chaînée
+ *
+ * Cette fonction crée une nouvelle cellule avec les paramètres donnés
+ * et l'ajoute à la fin de la liste. Si la liste est vide, la nouvelle
+ * cellule devient la tête de liste.
+ *
+ * @param l Pointeur vers la liste à modifier
+ * @param destination Identifiant du sommet de destination à ajouter
+ * @param probability Probabilité associée à la transition
+ *
+ * @note La fonction utilise create_cell() pour l'allocation de la nouvelle cellule
+ * @warning La liste doit être initialisée avant l'appel
+ *
+ * @see create_cell
+ * @see List
+ * @see Cell
+ */
 void add_cell(List* l, int destination, float probability) {
     Cell* newCell = create_cell(destination, probability);
     if (!l->head) {
@@ -64,9 +114,21 @@ void add_cell(List* l, int destination, float probability) {
     tmp->next = newCell;
 }
 
-// =====================================================
-// display_list : affiche une liste
-// =====================================================
+/**
+ * @brief Affiche le contenu d'une liste chaînée
+ *
+ * Parcourt la liste et affiche pour chaque cellule son sommet de destination
+ * et sa probabilité associée au format "-> (destination, probabilité)".
+ * Un retour à la ligne est ajouté à la fin de l'affichage.
+ *
+ * @param l Liste chaînée à afficher
+ *
+ * @note Le format d'affichage des probabilités utilise 6 décimales
+ * @note Si la liste est vide, seul un retour à la ligne est affiché
+ *
+ * @see List
+ * @see Cell
+ */
 void display_list(List l) {
     Cell* tmp = l.head;
     while (tmp) {
@@ -76,9 +138,23 @@ void display_list(List l) {
     printf("\n");
 }
 
-// =====================================================
-// create_adjacency_list : crée une liste d’adjacence vide
-// =====================================================
+/**
+ * @brief Crée une liste d'adjacence vide de taille donnée
+ *
+ * Alloue dynamiquement un tableau de listes chaînées représentant
+ * une liste d'adjacence pour un graphe de 'size' sommets. Chaque liste
+ * est initialisée comme une liste vide.
+ *
+ * @param size Nombre de sommets du graphe
+ * @return Une structure AdjacencyList initialisée
+ * 
+ * @warning La fonction termine le programme si l'allocation échoue
+ * @note La mémoire allouée doit être libérée avec la fonction appropriée
+ * quand la liste d'adjacence n'est plus utilisée
+ *
+ * @see AdjacencyList Structure représentant une liste d'adjacence
+ * @see create_empty_list
+ */
 AdjacencyList create_adjacency_list(int size) {
     AdjacencyList adj;
     adj.size = size;
@@ -92,9 +168,17 @@ AdjacencyList create_adjacency_list(int size) {
     return adj;
 }
 
-// =====================================================
-// display_adjacency_list : affiche la liste d'adjacence
-// =====================================================
+/**
+ * @brief Affiche le contenu complet d'une liste d'adjacence
+ *
+ * Affiche un en-tête suivi de chaque sommet et de sa liste de successeurs.
+ * Pour chaque sommet i, affiche "Sommet i : " suivi de sa liste d'adjacence.
+ *
+ * @param adj Structure de liste d'adjacence à afficher
+ *
+ * @see display_list
+ * @see AdjacencyList
+ */
 void display_adjacency_list(AdjacencyList adj) {
     printf("===== Liste d adjacence =====\n");
     for (int i = 0; i < adj.size; i++) {
@@ -103,9 +187,14 @@ void display_adjacency_list(AdjacencyList adj) {
     }
 }
 
-// =====================================================
-// free_adjacency_list : libère la mémoire allouée
-// =====================================================
+/**
+ * @brief Libère la mémoire allouée pour une liste d'adjacence
+ *
+ * Libère récursivement toutes les cellules de chaque liste d'adjacence,
+ * puis libère le tableau des listes.
+ *
+ * @param adj Structure de liste d'adjacence à libérer
+ */
 void free_adjacency_list(AdjacencyList adj) {
     for (int i = 0; i < adj.size; i++) {
         Cell* tmp = adj.array[i].head;
@@ -118,9 +207,18 @@ void free_adjacency_list(AdjacencyList adj) {
     free(adj.array);
 }
 
-// =====================================================
-// lireGraphe : crée une liste d’adjacence à partir d’un fichier texte
-// =====================================================
+/**
+ * @brief Crée une liste d'adjacence à partir d'un fichier texte
+ *
+ * Le format du fichier attendu est :
+ * - Première ligne : nombre de sommets n
+ * - Lignes suivantes : triplets "depart arrivee probabilite"
+ *
+ * @param nomFichier Chemin du fichier à lire
+ * @return Structure AdjacencyList construite à partir du fichier
+ *
+ * @warning Termine le programme en cas d'erreur de lecture/ouverture du fichier
+ */
 AdjacencyList lireGraphe(const char *nomFichier) {
     FILE *fichier = fopen(nomFichier, "rt");
     if (!fichier) {
@@ -150,6 +248,15 @@ AdjacencyList lireGraphe(const char *nomFichier) {
     fclose(fichier);
     return graphe;
 }
+/**
+ * @brief Variante de lecture de graphe depuis un fichier
+ *
+ * Similaire à lireGraphe() mais utilise des poids unitaires (1.0)
+ * au lieu des probabilités du fichier.
+ *
+ * @param nomFichier Chemin du fichier à lire
+ * @return Structure AdjacencyList construite à partir du fichier
+ */
 AdjacencyList lireGraphe2(const char *nomFichier) {
     FILE *fichier = fopen(nomFichier, "rt");
     if (!fichier) { perror("Impossible d'ouvrir le fichier"); exit(EXIT_FAILURE); }
@@ -177,10 +284,15 @@ AdjacencyList lireGraphe2(const char *nomFichier) {
     return graphe;
 }
 
-
-// =====================================================
-// verifierGrapheMarkov : vérifie les probabilités sortantes
-// =====================================================
+/**
+ * @brief Vérifie si le graphe est un graphe de Markov
+ *
+ * Vérifie pour chaque sommet si la somme des probabilités sortantes
+ * est égale à 1 (à une tolérance de ±0.01 près).
+ * Affiche les résultats pour chaque sommet et la conclusion finale.
+ *
+ * @param graphe Structure de liste d'adjacence à vérifier
+ */
 void verifierGrapheMarkov(AdjacencyList graphe) {
     int estMarkov = 1;
     for (int i = 0; i < graphe.size; i++) {
@@ -204,9 +316,17 @@ void verifierGrapheMarkov(AdjacencyList graphe) {
         printf("Le graphe n est pas un graphe de Markov.\n");
 }
 
-// =====================================================
-// ecrireFichierMermaid : génère un fichier au format Mermaid
-// =====================================================
+/**
+ * @brief Génère une représentation Mermaid du graphe
+ *
+ * Crée un fichier au format Mermaid contenant une représentation visuelle
+ * du graphe orienté avec les probabilités sur les arcs.
+ *
+ * @param graphe Structure de liste d'adjacence à convertir
+ * @param nomFichier Nom du fichier de sortie à créer
+ *
+ * @warning Termine le programme en cas d'erreur d'écriture du fichier
+ */
 void ecrireFichierMermaid(AdjacencyList graphe, const char *nomFichier) {
     FILE *fichier = fopen(nomFichier, "wt");
     if (!fichier) {
@@ -237,6 +357,15 @@ void ecrireFichierMermaid(AdjacencyList graphe, const char *nomFichier) {
     printf("Fichier Mermaid genere : %s\n", nomFichier);
 }
 
+/**
+ * @brief Initialise un tableau de sommets pour l'algorithme de Tarjan
+ *
+ * @param n Nombre de sommets à initialiser
+ * @return Tableau de t_tarjan_vertex initialisé
+ * 
+ * @note Les sommets sont numérotés de 1 à n
+ * @warning Termine le programme en cas d'échec d'allocation
+ */
 t_tarjan_vertex* init_tarjan_vertice(int n) {
     t_tarjan_vertex *tab = (t_tarjan_vertex*) malloc(n * sizeof(t_tarjan_vertex));
     if (!tab) {
@@ -254,7 +383,12 @@ t_tarjan_vertex* init_tarjan_vertice(int n) {
     return tab;
 }
 
-
+/**
+ * @brief Crée une nouvelle classe d'équivalence
+ *
+ * @param name Nom de la classe à créer
+ * @return Structure t_classe initialisée
+ */
 t_classe create_classe(const char* name) {
     t_classe c;
     strcpy(c.name, name);
@@ -264,15 +398,29 @@ t_classe create_classe(const char* name) {
     return c;
 }
 
-
+/**
+ * @brief Ajoute un sommet à une classe d'équivalence
+ *
+ * @param c Pointeur vers la classe à modifier
+ * @param v Sommet à ajouter
+ *
+ * @note Redimensionne automatiquement si nécessaire
+ * @warning Termine le programme en cas d'échec de réallocation
+ */
 void classe_add_vertex(t_classe* c, t_tarjan_vertex* v) {
     if (c->count == c->capacity) {
         c->capacity *= 2;
-        c->vertices = realloc(c->vertices, c->capacity * sizeof(t_tarjan_vertex*));
+        c->vertices = realloc(c->vertices, c->capacity * sizeof(int));
+        if (!c->vertices) { perror("realloc"); exit(EXIT_FAILURE); }
     }
-    c->vertices[c->count++] = v;
+    c->vertices[c->count++] = v->id;
 }
 
+/**
+ * @brief Crée une nouvelle partition vide
+ *
+ * @return Structure t_partition initialisée
+ */
 t_partition create_partition() {
     t_partition p;
     p.count = 0;
@@ -281,6 +429,14 @@ t_partition create_partition() {
     return p;
 }
 
+/**
+ * @brief Ajoute une classe à une partition
+ *
+ * @param p Pointeur vers la partition à modifier
+ * @param c Classe à ajouter
+ *
+ * @note Redimensionne automatiquement si nécessaire
+ */
 void partition_add_classe(t_partition* p, t_classe c) {
     if (p->count == p->capacity) {
         p->capacity *= 2;
@@ -289,7 +445,12 @@ void partition_add_classe(t_partition* p, t_classe c) {
     p->classes[p->count++] = c;
 }
 
-
+/**
+ * @brief Crée une nouvelle pile
+ *
+ * @param capacity Capacité initiale de la pile
+ * @return Pointeur vers la structure Stack créée
+ */
 Stack* stack_create(int capacity) {
     Stack* s = malloc(sizeof(Stack));
     s->data = malloc(capacity * sizeof(int));
@@ -298,27 +459,83 @@ Stack* stack_create(int capacity) {
     return s;
 }
 
+/**
+ * @brief Empile un élément
+ *
+ * @param s Pointeur vers la pile
+ * @param v Valeur à empiler
+ */
 void stack_push(Stack* s, int v) {
     s->data[++s->top] = v;
 }
 
+/**
+ * @brief Dépile et retourne l'élément au sommet
+ *
+ * @param s Pointeur vers la pile
+ * @return Valeur dépilée
+ */
 int stack_pop(Stack* s) {
     return s->data[s->top--];
 }
 
+/**
+ * @brief Consulte l'élément au sommet sans le retirer
+ *
+ * @param s Pointeur vers la pile
+ * @return Valeur au sommet
+ */
 int stack_top(Stack* s) {
     return s->data[s->top];
 }
 
+/**
+ * @brief Vérifie si la pile est vide
+ *
+ * @param s Pointeur vers la pile
+ * @return 1 si la pile est vide, 0 sinon
+ */
 int stack_empty(Stack* s) {
     return s->top == -1;
 }
-// Comparateur pour qsort (mettre en haut du fichier)
+
+/**
+ * @brief Fonction de comparaison pour le tri d'entiers
+ *
+ * @param a Pointeur vers le premier entier
+ * @param b Pointeur vers le second entier
+ * @return Différence entre les deux entiers
+ */
 int cmp_int(const void *a, const void *b) {
     return (*(int*)a - *(int*)b);
 }
 
+// Comparateur pour qsort (mettre en haut du fichier)
 // Fonction parcours corrigée
+
+/**
+ * @brief Implémente l'algorithme de Tarjan pour trouver les composantes fortement connexes
+ *
+ * Cette fonction récursive implémente les étapes principales de l'algorithme de Tarjan :
+ * 1. Initialisation des numéros de découverte et lowlink
+ * 2. Empilement du sommet courant
+ * 3. Parcours des successeurs
+ * 4. Identification et création des composantes fortement connexes
+ *
+ * @param v_index Index du sommet courant (base 0)
+ * @param graph Liste d'adjacence du graphe
+ * @param tab Tableau des sommets avec leurs attributs Tarjan
+ * @param partition Pointeur vers la partition à construire
+ * @param S Pile utilisée par l'algorithme
+ * @param num Pointeur vers le compteur de numérotation
+ *
+ * @note Les sommets dans chaque composante sont triés par ordre croissant
+ * @warning La fonction suppose que les indices des sommets sont valides
+ *
+ * @see t_tarjan_vertex
+ * @see t_partition
+ * @see Stack
+ */
 void parcours(int v_index, AdjacencyList graph, t_tarjan_vertex *tab,
               t_partition *partition, Stack *S, int *num) {
 
@@ -388,6 +605,26 @@ void parcours(int v_index, AdjacencyList graph, t_tarjan_vertex *tab,
 }
 
 /* Fonction tarjan complète qui prépare tout et appelle parcours sur chaque sommet non visité */
+
+/**
+ * @brief Implémente l'algorithme de Tarjan pour trouver les composantes fortement connexes d'un graphe
+ *
+ * Cette fonction initialise les structures nécessaires et lance l'algorithme de Tarjan
+ * pour identifier toutes les composantes fortement connexes du graphe.
+ * Elle effectue :
+ * - L'initialisation des structures de données
+ * - Le lancement du parcours pour chaque sommet non visité
+ * - Le nettoyage des ressources allouées
+ *
+ * @param graph Liste d'adjacence du graphe à analyser
+ * @return Une partition contenant toutes les composantes fortement connexes
+ *
+ * @note La mémoire allouée pour la partition retournée doit être libérée par l'appelant
+ *
+ * @see t_partition
+ * @see parcours
+ * @see init_tarjan_vertice
+ */
 t_partition tarjan(AdjacencyList graph) {
     int n = graph.size;
     t_tarjan_vertex *tab = init_tarjan_vertice(n);
@@ -409,7 +646,17 @@ t_partition tarjan(AdjacencyList graph) {
     return partition;
 }
 
-
+/**
+ * @brief Libère la mémoire allouée pour une partition
+ *
+ * Libère récursivement :
+ * - Les tableaux de sommets de chaque classe
+ * - Le tableau des classes de la partition
+ *
+ * @param p Partition à libérer
+ *
+ * @note Cette fonction doit être appelée lorsque la partition n'est plus nécessaire
+ */
 void free_partition(t_partition p) {
     for (int i = 0; i < p.count; i++) {
         free(p.classes[i].vertices);  // libère le tableau des sommets de chaque classe
@@ -417,7 +664,13 @@ void free_partition(t_partition p) {
     free(p.classes);  // libère le tableau des classes
 }
 
-
+/**
+ * @brief Construit un tableau d'index des classes pour chaque sommet
+ *
+ * @param partition Partition contenant les classes
+ * @param nbSommets Nombre total de sommets dans le graphe
+ * @return Tableau où classOf[i] contient l'index de la classe du sommet i
+ */
 int* build_class_index(t_partition partition, int nbSommets) {
     int *classOf = malloc((nbSommets + 1) * sizeof(int));
 
@@ -432,6 +685,14 @@ int* build_class_index(t_partition partition, int nbSommets) {
     return classOf;
 }
 
+/**
+ * @brief Construit la matrice des liens entre les classes
+ *
+ * @param g Graphe d'origine
+ * @param p Partition des classes
+ * @param classOf Tableau d'index des classes
+ * @return Matrice d'adjacence entre les classes
+ */
 int** build_class_links(AdjacencyList g, t_partition p, int *classOf) {
     int nC = p.count;
 
@@ -464,6 +725,16 @@ int** build_class_links(AdjacencyList g, t_partition p, int *classOf) {
 // =====================================================
 // ÉTAPE 3 : Caractéristiques du graphe
 // =====================================================
+
+/**
+ * @brief Vérifie si un état est absorbant
+ *
+ * Un état est absorbant s'il n'a que des transitions vers lui-même
+ *
+ * @param g Graphe à analyser
+ * @param sommet Numéro du sommet à tester
+ * @return 1 si le sommet est absorbant, 0 sinon
+ */
 int est_absorbant(AdjacencyList g, int sommet) {
     Cell *tmp = g.array[sommet-1].head;
     if (!tmp) return 0; // aucun lien sortant -> pas absorbant
@@ -483,6 +754,11 @@ int est_absorbant(AdjacencyList g, int sommet) {
 
     }
 
+/**
+ * @brief Affiche les états absorbants du graphe
+ *
+ * @param g Graphe à analyser
+ */
 void afficher_etats_absorbants(AdjacencyList g) {
     printf(" Etats absorbants : ");
     int found = 0;
@@ -501,6 +777,17 @@ void afficher_etats_absorbants(AdjacencyList g) {
     if (!found) printf("Aucun");
     printf("\n");
 }
+
+/**
+ * @brief Identifie et affiche les classes transitoires et persistantes
+ *
+ * Une classe est transitoire si elle a des liens sortants vers d'autres classes,
+ * persistante sinon
+ *
+ * @param g Graphe d'origine
+ * @param p Partition des classes
+ * @param classOf Tableau d'index des classes
+ */
 void classes_transitoires_persistantes(AdjacencyList g, t_partition p, int *classOf) {
 
     int nC = p.count;
@@ -537,12 +824,33 @@ void classes_transitoires_persistantes(AdjacencyList g, t_partition p, int *clas
     for (int i = 0; i < nC; i++) free(link[i]);
     free(link);
 }
+
+/**
+ * @brief Teste et affiche si le graphe est irréductible
+ *
+ * Un graphe est irréductible s'il n'a qu'une seule classe
+ *
+ * @param p Partition à analyser
+ */
 void tester_irreductibilite(t_partition p) {
     if (p.count == 1)
         printf("Le graphe est IRRÉDUCTIBLE\n");
     else
         printf("Le graphe n'est PAS irreductible (%d classes)\n", p.count);
 }
+
+/**
+ * @brief Analyse et affiche les caractéristiques principales du graphe
+ *
+ * Affiche :
+ * 1. Les états absorbants
+ * 2. La nature des classes (transitoires/persistantes)
+ * 3. L'irréductibilité
+ *
+ * @param g Graphe à analyser
+ * @param p Partition des classes
+ * @param classOf Tableau d'index des classes
+ */
 void caracteristiques_graphe(AdjacencyList g, t_partition p, int *classOf) {
 
     printf("1) Etats absorbants :\n");
@@ -557,6 +865,14 @@ void caracteristiques_graphe(AdjacencyList g, t_partition p, int *classOf) {
     printf("\n");
 }
 
+
+/**
+ * @brief Génère une représentation Mermaid du diagramme de Hasse du graphe
+ *
+ * @param filename Nom du fichier de sortie
+ * @param p Partition des classes
+ * @param links Matrice des liens entre classes
+ */
 void generate_mermaid_hasse(const char *filename, t_partition p, int **links) {
     FILE *f = fopen(filename, "w");
     if (!f) {
@@ -607,8 +923,3 @@ void generate_mermaid_hasse(const char *filename, t_partition p, int **links) {
     fclose(f);
     printf("Fichier Mermaid genere un graphe de hasse: %s\n", filename);
 }
-
-
-
-
-//

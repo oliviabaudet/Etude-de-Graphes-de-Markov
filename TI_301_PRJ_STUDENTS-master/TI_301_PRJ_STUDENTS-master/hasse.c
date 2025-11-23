@@ -49,4 +49,3 @@ void removeTransitiveLinks(t_link_array *p_link_array)
 }
 
 */
-²
