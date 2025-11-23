@@ -394,7 +394,7 @@ t_classe create_classe(const char* name) {
     strcpy(c.name, name);
     c.count = 0;
     c.capacity = 4;
-    c.vertices = malloc(c.capacity * sizeof(int)); // <-- int et non t_tarjan_vertex*
+    c.vertices = malloc(c.capacity * sizeof(int));
     return c;
 }
 
@@ -641,7 +641,7 @@ t_partition tarjan(AdjacencyList graph) {
     /* cleanup */
     free(S->data);
     free(S);
-    free(tab); /* si tu veux garder tab pour debug, n'appelles pas free ici */
+    free(tab);
 
     return partition;
 }
@@ -893,7 +893,7 @@ void generate_mermaid_hasse(const char *filename, t_partition p, int **links) {
 
     // 1. Écrire les noeuds
     for (int i = 0; i < p.count; i++) {
-        char *ID = getID(i + 1);  // <-- utilisation ici
+        char *ID = getID(i + 1);
         fprintf(f, "%s[\"{", ID);
 
         for (int j = 0; j < p.classes[i].count; j++) {

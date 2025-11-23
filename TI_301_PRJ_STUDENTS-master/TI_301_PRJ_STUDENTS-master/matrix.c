@@ -2,7 +2,12 @@
 #include <math.h>
 
 
-
+/**
+ * @brief Crée une matrice carrée vide de taille n x n
+ *
+ * @param n Dimension de la matrice
+ * @return Une matrice initialisée avec des zéros
+ */
 t_matrix createEmptyMatrix(int n) {
     t_matrix M;
     M.rows = n; //nombre de ligne de la matrice vide
@@ -14,6 +19,12 @@ t_matrix createEmptyMatrix(int n) {
     return M;
 }
 
+/**
+ * @brief Convertit une liste d'adjacence en matrice de transition
+ *
+ * @param adj Liste d'adjacence à convertir
+ * @return Matrice de transition correspondante
+ */
 t_matrix matrixAdjacencyList(AdjacencyList adj){
     int n = adj.size;                   // nombre d'états
     t_matrix M = createEmptyMatrix(n);  // matrice créée et initialisée à 0
@@ -30,6 +41,12 @@ t_matrix matrixAdjacencyList(AdjacencyList adj){
     return M;
 }
 
+/**
+ * @brief Copie une matrice source vers une matrice destination
+ *
+ * @param dest Matrice de destination
+ * @param src Matrice source
+ */
 void copyMatrix(t_matrix dest, t_matrix src) {
     // on vérifie les tailles
     if (dest.rows != src.rows || dest.cols != src.cols) {
@@ -44,6 +61,14 @@ void copyMatrix(t_matrix dest, t_matrix src) {
     }
 }
 
+/**
+ * @brief Multiplie deux matrices et stocke le résultat dans une troisième
+ *
+ * @param A Première matrice
+ * @param B Deuxième matrice
+ * @param C Matrice résultat
+ * @return 0 si succès, -1 si erreur de dimensions
+ */
 int multiplyMatrices(t_matrix A,t_matrix B, t_matrix C) {
     // Vérifier que les tailles sont compatibles
     if (A.rows != B.rows || A.cols != B.cols || C.rows != A.rows || C.cols != A.cols) {
@@ -64,6 +89,13 @@ int multiplyMatrices(t_matrix A,t_matrix B, t_matrix C) {
     return 0;
 }
 
+/**
+ * @brief Calcule la différence totale entre deux matrices
+ *
+ * @param A Première matrice
+ * @param B Deuxième matrice
+ * @return Somme des différences absolues entre les éléments
+ */
 double diffMatrices(t_matrix A,t_matrix B) {
     if (A.rows != B.rows || A.cols != B.cols) {
         printf("Erreur: copie impossible: matrices de tailles differentes.\n");
@@ -79,14 +111,26 @@ double diffMatrices(t_matrix A,t_matrix B) {
     return diff;
 }
 
+/**
+ * @brief Libère la mémoire allouée pour une matrice
+ *
+ * @param A Matrice à libérer
+ */
 void freeMatrix(t_matrix A) {
     for(int i = 0; i < A.rows; i++)
         free(A.data[i]);
     free(A.data);
 }
 
-
-t_matrix subMatrix(t_matrix matrix, t_partition part, int compo_index)//Extracts a submatrix corresponding to a specific component of a graph partition
+/**
+ * @brief Extrait une sous-matrice correspondant à une composante spécifique
+ *
+ * @param matrix Matrice d'origine
+ * @param part Partition du graphe
+ * @param compo_index Index de la composante à extraire
+ * @return Sous-matrice extraite
+ */
+t_matrix subMatrix(t_matrix matrix, t_partition part, int compo_index)
 {
     // 1) Récupérer la classe
     t_classe classe = part.classes[compo_index];
@@ -107,6 +151,13 @@ t_matrix subMatrix(t_matrix matrix, t_partition part, int compo_index)//Extracts
     return sub;
 }
 
+/**
+ * @brief Calcule la puissance limite d'une matrice stochastique
+ *
+ * @param M Matrice stochastique d'entrée
+ * @return Matrice limite
+ * @note Utilise une méthode itérative avec normalisation
+ */
 t_matrix limitPower(t_matrix M)
 {
     int n = M.rows;
@@ -147,10 +198,11 @@ t_matrix limitPower(t_matrix M)
 }
 
 
-
-
-
-
+/**
+ * @brief Affiche la distribution stationnaire d'une chaîne de Markov
+ *
+ * @param limit Matrice limite contenant la distribution stationnaire
+ */
 void printStationary(t_matrix limit)
 {
     int n = limit.rows;

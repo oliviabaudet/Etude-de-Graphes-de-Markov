@@ -7,6 +7,14 @@
 #include "utils.h"
 #include <stdio.h>
 
+/**
+ * @brief Structure représentant une matrice de nombres réels
+ *
+ * @struct t_matrix
+ * @var t_matrix::rows Nombre de lignes de la matrice
+ * @var t_matrix::cols Nombre de colonnes de la matrice
+ * @var t_matrix::data Tableau 2D contenant les éléments de la matrice
+ */
 typedef struct {
     int rows;
     int cols;
