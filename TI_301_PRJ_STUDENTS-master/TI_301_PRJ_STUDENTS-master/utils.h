@@ -59,9 +59,19 @@ typedef struct {
 
 /**
  * @struct t_tarjan_vertex
- * @brief Structure utilisée dans l'algorithme de Tarjan pour la recherche de composantes fortement connexes
- * 
- * Cette structure stocke les informations nécessaires pour chaque sommet
+ * @brief Structure représentant un sommet pour l'algorithme de Tarjan
+ *
+ * Cette structure contient les informations nécessaires pour chaque sommet
+ * lors de l'exécution de l'algorithme de Tarjan.
+ *
+ * @var t_tarjan_vertex::id
+ * Identifiant unique du sommet dans le graphe
+ * @var t_tarjan_vertex::num
+ * Numéro de découverte du sommet lors du parcours DFS
+ * @var t_tarjan_vertex::lowlink
+ * Plus petit numéro accessible depuis ce sommet
+ * @var t_tarjan_vertex::onStack
+ * Indique si le sommet est présent sur la pile (1) ou non (0)
  */
 typedef struct {
     int id;          
@@ -70,20 +80,63 @@ typedef struct {
     int onStack;     
 } t_tarjan_vertex;
 
+/**
+ * @struct t_classe
+ * @brief Structure représentant une classe de sommets (composante fortement connexe)
+ * 
+ * Cette structure stocke un ensemble de sommets appartenant à la même composante
+ * fortement connexe du graphe.
+ * 
+ * @var t_classe::name
+ * Nom identifiant la classe (format "C1", "C2", etc.)
+ * @var t_classe::vertices
+ * Tableau dynamique contenant les identifiants des sommets de la classe
+ * @var t_classe::count
+ * Nombre actuel de sommets dans la classe
+ * @var t_classe::capacity
+ * Capacité maximale du tableau vertices
+ */
 typedef struct {
-    char name[10];  
-    int *vertices;  
-    int count;      
-    int capacity;   
+    char name[10];
+    int *vertices;
+    int count;
+    int capacity;
 } t_classe;
 
-
+/**
+ * @struct t_partition
+ * @brief Structure représentant une partition des sommets du graphe
+ * 
+ * Cette structure stocke l'ensemble des classes (composantes fortement connexes)
+ * formant une partition du graphe.
+ * 
+ * @var t_partition::classes
+ * Tableau dynamique de classes
+ * @var t_partition::count
+ * Nombre actuel de classes dans la partition
+ * @var t_partition::capacity
+ * Capacité maximale du tableau classes
+ */
 typedef struct {
     t_classe* classes;
     int count;
     int capacity;
 } t_partition;
 
+/**
+ * @struct Stack
+ * @brief Structure représentant une pile d'entiers
+ * 
+ * Cette structure implémente une pile LIFO (Last In First Out) utilisée dans
+ * l'algorithme de Tarjan.
+ * 
+ * @var Stack::data
+ * Tableau dynamique stockant les éléments de la pile
+ * @var Stack::top
+ * Index du sommet de la pile (-1 si la pile est vide)
+ * @var Stack::capacity
+ * Capacité maximale de la pile
+ */
 typedef struct {
     int* data;
     int top;
