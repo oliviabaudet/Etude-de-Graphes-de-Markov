@@ -484,7 +484,7 @@ int est_absorbant(AdjacencyList g, int sommet) {
     }
 
 void afficher_etats_absorbants(AdjacencyList g) {
-    printf("• Etats absorbants : ");
+    printf(" Etats absorbants : ");
     int found = 0;
 
     for (int i = 1; i <= g.size; i++) {
@@ -605,7 +605,7 @@ void generate_mermaid_hasse(const char *filename, t_partition p, int **links) {
     }
 
     fclose(f);
-    printf("Fichier Mermaid genere : %s\n", filename);
+    printf("Fichier Mermaid genere un graphe de hasse: %s\n", filename);
 }
 
 

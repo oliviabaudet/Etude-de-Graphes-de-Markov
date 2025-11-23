@@ -7,6 +7,7 @@
 
 
 int main() {
+    printf("\n=== Partie 1 ===\n");
     system("chcp 65001 > nul");
     setlocale(LC_ALL, "");
     //bien lire les fichier.txt de data PARTIE 3
@@ -61,7 +62,7 @@ int main() {
     // ====================================================
     // ÉTAPE 3 : caracteristiques du graphe (TRANSITOIRE / PERSISTANTE / ABSORBANTE / IRRÉDUCTIBLE)
     // ====================================================
-    printf("\n=== Etape 3 : Caractéristiques du graphe ===\n");
+    printf("\n=== Caractéristiques du graphe ===\n");
     caracteristiques_graphe(g, partition, classOf);
     // Libération
     free(classOf);
